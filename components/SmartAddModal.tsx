@@ -16,7 +16,7 @@ type TabType = 'event' | 'document' | 'task';
 export const SmartAddModal: React.FC<SmartAddModalProps> = ({ onClose, onAddEvent, onAddDocument, onAddTask, initialTab = 'event', initialData }) => {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
-  // Get current date string for min attribute to disable past dates
+  // Get current date string just for default values, not for limits
   const now = new Date();
   const currentDateTime = now.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm
   
@@ -229,7 +229,6 @@ export const SmartAddModal: React.FC<SmartAddModalProps> = ({ onClose, onAddEven
                         type="datetime-local"
                         name="start"
                         required
-                        min={initialData ? undefined : currentDateTime} // Disable past dates only for new
                         value={eventData.start}
                         onChange={handleEventChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
@@ -241,7 +240,6 @@ export const SmartAddModal: React.FC<SmartAddModalProps> = ({ onClose, onAddEven
                         type="datetime-local"
                         name="end"
                         required
-                        min={eventData.start} // End cannot be before Start
                         value={eventData.end}
                         onChange={handleEventChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm"
@@ -367,7 +365,6 @@ export const SmartAddModal: React.FC<SmartAddModalProps> = ({ onClose, onAddEven
                         type="datetime-local"
                         name="deadline"
                         required
-                        min={initialData ? undefined : currentDateTime}
                         value={docData.deadline}
                         onChange={handleDocChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-base"
@@ -415,7 +412,6 @@ export const SmartAddModal: React.FC<SmartAddModalProps> = ({ onClose, onAddEven
                     <input
                         type="datetime-local"
                         name="dueDate"
-                        min={initialData ? undefined : currentDateTime}
                         value={taskData.dueDate}
                         onChange={handleTaskChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-base"

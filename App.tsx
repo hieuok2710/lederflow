@@ -300,22 +300,27 @@ const AuthenticatedApp: React.FC<{ currentUser: User; onLogout: () => void }> = 
       setNotificationPermission(Notification.permission);
     }
     
-    const today = new Date();
-    const todayStr = today.toDateString();
-    
-    const todaysEvents = events.filter(e => new Date(e.start).toDateString() === todayStr);
-    const urgentTasks = tasks.filter(t => !t.completed && (t.priority === Priority.URGENT || t.priority === Priority.HIGH));
-    
-    if (todaysEvents.length > 0 || urgentTasks.length > 0) {
-      setShowDailySummary(true);
-      
-      if (Notification.permission === 'granted' && notifSettings.enableSound) {
-        new Notification("📅 Lịch trình hôm nay", {
-          body: `Xin chào ${currentUser.fullName}, bạn có ${todaysEvents.length} sự kiện và ${urgentTasks.length} việc gấp hôm nay.`,
-          icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-          tag: 'daily-summary'
-        });
-      }
+    // Check notifications safely
+    try {
+        const today = new Date();
+        const todayStr = today.toDateString();
+        
+        const todaysEvents = events.filter(e => new Date(e.start).toDateString() === todayStr);
+        const urgentTasks = tasks.filter(t => !t.completed && (t.priority === Priority.URGENT || t.priority === Priority.HIGH));
+        
+        if (todaysEvents.length > 0 || urgentTasks.length > 0) {
+          setShowDailySummary(true);
+          
+          if (Notification.permission === 'granted' && notifSettings.enableSound) {
+            new Notification("📅 Lịch trình hôm nay", {
+              body: `Xin chào ${currentUser.fullName}, bạn có ${todaysEvents.length} sự kiện và ${urgentTasks.length} việc gấp hôm nay.`,
+              icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+              tag: 'daily-summary'
+            });
+          }
+        }
+    } catch (e) {
+        console.error("Notification check failed", e);
     }
   }, []);
 
@@ -572,21 +577,18 @@ const AuthenticatedApp: React.FC<{ currentUser: User; onLogout: () => void }> = 
                 <div className="p-5 space-y-5">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Nhắc trước thời gian (phút)</label>
-                        <select 
-                            value={notifSettings.reminderTime}
-                            onChange={(e) => setNotifSettings(prev => ({...prev, reminderTime: parseInt(e.target.value)}))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
-                        >
-                            <option value="5">5 phút trước</option>
-                            <option value="10">10 phút trước</option>
-                            <option value="15">15 phút trước</option>
-                            <option value="20">20 phút trước</option>
-                            <option value="30">30 phút trước</option>
-                            <option value="45">45 phút trước</option>
-                            <option value="60">1 tiếng trước</option>
-                            <option value="90">1 tiếng 30 phút trước</option>
-                            <option value="120">2 tiếng trước</option>
-                        </select>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                min="1"
+                                value={notifSettings.reminderTime}
+                                onChange={(e) => setNotifSettings(prev => ({...prev, reminderTime: Math.max(1, parseInt(e.target.value) || 0)}))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white pr-12"
+                                placeholder="Nhập số phút..."
+                            />
+                            <span className="absolute right-3 top-2 text-gray-400 text-sm pointer-events-none">phút</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Nhập số phút bạn muốn hệ thống nhắc trước (VD: 1440 = 1 ngày).</p>
                     </div>
 
                     <div>

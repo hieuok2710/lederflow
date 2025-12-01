@@ -80,6 +80,9 @@ export const Calendar: React.FC<CalendarProps> = ({ events, mode, onModeChange, 
     const top = (startHour * 60 + startMin) * (HOUR_HEIGHT / 60);
     let durationMin = (end.getTime() - start.getTime()) / (1000 * 60);
     
+    // Safety check for negative duration if user inputs End < Start
+    if (durationMin < 0) durationMin = 30;
+    
     // Min height 30 mins visual
     if (durationMin < 30) durationMin = 30;
     
@@ -320,7 +323,7 @@ export const Calendar: React.FC<CalendarProps> = ({ events, mode, onModeChange, 
           </div>
 
           {/* Timeline Grid */}
-          <div className="grid grid-cols-[50px_1fr] flex-1">
+          <div className="grid grid-cols-[50px_1fr] flex-1 pb-8">
              {/* Time Column */}
              <div className="border-r border-gray-100 bg-gray-50/30">
                {hours.map((hour) => (
@@ -330,6 +333,12 @@ export const Calendar: React.FC<CalendarProps> = ({ events, mode, onModeChange, 
                    </span>
                  </div>
                ))}
+               {/* 24:00 Marker */}
+               <div className="relative text-right pr-2 text-xs text-gray-400 font-medium">
+                  <span className="absolute -top-2 right-2 bg-white px-1 z-10">
+                     24:00
+                   </span>
+               </div>
              </div>
 
              {/* Events Columns */}
@@ -338,12 +347,14 @@ export const Calendar: React.FC<CalendarProps> = ({ events, mode, onModeChange, 
                 {hours.map((hour) => (
                     <div key={hour} className="absolute w-full border-t border-gray-100 border-dashed pointer-events-none" style={{ top: `${hour * HOUR_HEIGHT}px` }}></div>
                 ))}
+                {/* Bottom Border for 24:00 */}
+                <div className="absolute w-full border-t border-gray-100 border-dashed pointer-events-none" style={{ top: `${24 * HOUR_HEIGHT}px` }}></div>
                 
                 {/* Day Columns */}
                 {days.map((day, i) => {
                    const isPast = isPastDate(day);
                    return (
-                    <div key={i} className={`relative border-r border-gray-100 last:border-r-0 h-full ${isPast ? 'bg-gray-50/30' : ''}`}>
+                    <div key={i} className={`relative border-r border-gray-100 last:border-r-0 h-full min-h-[1440px] ${isPast ? 'bg-gray-50/30' : ''}`}>
                         {renderTimelineEvents(day)}
                     </div>
                    );
